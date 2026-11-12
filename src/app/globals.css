@@ -1,0 +1,43 @@
+/* Global stylesheet. The order here is load-bearing.
+ *
+ * Fonts (self-hosted @fontsource files) and the Material Symbols icon font are imported from
+ * `layout.tsx`, not here: Next resolves a package CSS import from JS and keeps the font urls
+ * pointing at the emitted assets, which an @import inside a PostCSS-processed file does not.
+ *
+ * EVERY rule below the Tailwind import must sit in an explicit @layer. Tailwind 4 puts its
+ * utilities inside @layer utilities, and unlayered CSS beats every layered rule regardless of
+ * specificity -- so an unlayered `.card { padding: 0 }` silently wins over `p-6`.
+ */
+@import '../styles/theme.css';
+@import '../styles/tokens.css';
+@import '../styles/components.css';
+@import '../styles/typography.css';
+
+@layer base {
+  html {
+    font-family: var(--font-primary);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-background);
+    color: var(--color-text);
+    /* The one place --text-base actually sets a rendered size app-wide -- everything in
+     * typography.css derives from the same var() rather than restating a number. */
+    font-size: var(--text-base);
+  }
+
+  a {
+    color: var(--color-primary);
+    text-decoration-color: var(--color-primary-light);
+  }
+  a:hover {
+    color: var(--color-primary-dark);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}

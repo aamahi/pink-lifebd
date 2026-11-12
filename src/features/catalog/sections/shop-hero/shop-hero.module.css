@@ -1,0 +1,32 @@
+/* The shop hero's entrance: pieces rise into place one after another.
+ *
+ * A CSS animation rather than the Angular component's `element.animate()` call from an effect. The
+ * effect version runs after hydration, so on a server-rendered page the pieces first paint in their
+ * final position, vanish when the effect starts the animation, and then rise -- appear, disappear,
+ * appear. The Angular app was client-rendered, so it never had a "before" to flash. A CSS animation
+ * starts on first paint of the server HTML and hydration reuses the same nodes, so it plays once.
+ *
+ * `both` fill keeps a piece at its starting pose during its stagger delay. The per-piece delay
+ * (150ms + index * 120ms, the Angular values) arrives as `--delay` from the component.
+ */
+@keyframes rise {
+  from {
+    transform: translateY(28px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.piece {
+  animation: rise 800ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--delay, 150ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .piece {
+    animation: none;
+  }
+}

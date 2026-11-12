@@ -1,0 +1,209 @@
+.root {
+  --st-bg: #ffffff;
+  --st-ink: #18181b;
+  --st-fuse: #f5a524;
+  --st-w: 356px;
+  --st-radius: 12px;
+  --st-slide: 400ms;
+  --st-gap: 10px;
+  --st-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  display: grid;
+  grid-template-rows: 1fr;
+  width: min(var(--st-w), 100%);
+  color: var(--st-ink);
+  font-size: 13px;
+  line-height: 1.5;
+  pointer-events: auto;
+}
+.gate {
+  min-height: 0;
+}
+.lift {
+  margin-top: var(--st-gap);
+}
+
+.root.toastEnter {
+  animation: st-rows-open var(--st-slide) var(--st-ease-out);
+}
+.root.toastEnter .lift {
+  animation: st-rise var(--st-slide) var(--st-ease-out);
+}
+.root.toastLeave {
+  animation: st-rows-close calc(var(--st-slide) * 0.7) var(--st-ease-out) forwards;
+}
+.root.toastLeave .lift {
+  animation: st-drop calc(var(--st-slide) * 0.7) var(--st-ease-out) forwards;
+}
+.root.toastLeave[data-instant] {
+  animation-duration: 200ms;
+}
+.root.toastLeave[data-instant] .lift {
+  animation: none;
+  visibility: hidden;
+}
+@keyframes st-rows-open {
+  from {
+    grid-template-rows: 0fr;
+  }
+}
+@keyframes st-rows-close {
+  to {
+    grid-template-rows: 0fr;
+  }
+}
+/* Opacity finishes at 60% of the rise and 70% of the drop, as the original's
+   separately-timed opacity transitions did. */
+@keyframes st-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes st-drop {
+  70% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+@keyframes st-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes st-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .root.toastEnter .lift {
+    animation: st-fade-in 200ms ease;
+  }
+  .root.toastLeave .lift {
+    animation: st-fade-out 200ms ease forwards;
+  }
+}
+
+.card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border-radius: var(--st-radius);
+  overflow: hidden;
+  background: var(--st-bg);
+  /* SwipeToast's two-layer shadow, plus a 1px hairline: a white card on the
+     near-white detail overlay otherwise has no visible edge. */
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: grab;
+  outline: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.card[data-swiping] {
+  cursor: grabbing;
+}
+.card:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--st-bg),
+    0 0 0 4px var(--st-fuse);
+}
+.icon {
+  display: inline-flex;
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+/* The theme's own status colours, which are dark enough to read on white. */
+.root[data-tone='success'] .icon {
+  color: var(--color-success);
+}
+.root[data-tone='info'] .icon {
+  color: #2563eb;
+}
+.root[data-tone='warning'] .icon {
+  color: var(--color-warning);
+}
+.root[data-tone='danger'] .icon {
+  color: var(--color-danger);
+}
+.body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.title {
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.close {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+  touch-action: manipulation;
+  transition:
+    transform 160ms var(--st-ease-out),
+    background-color 160ms ease;
+}
+/* A 40px hit area around a 24px glyph. */
+.close::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+.close:active {
+  transform: scale(0.97);
+}
+.close:focus-visible {
+  box-shadow: 0 0 0 2px var(--st-fuse);
+}
+@media (hover: hover) and (pointer: fine) {
+  .close:hover {
+    background: color-mix(in srgb, var(--st-ink) 10%, transparent);
+  }
+}
+.fuse {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--st-fuse) 18%, transparent) 9%,
+    color-mix(in srgb, var(--st-fuse) 50%, transparent) 18%,
+    color-mix(in srgb, var(--st-fuse) 84%, transparent) 28%,
+    var(--st-fuse) 38%,
+    var(--st-fuse) 62%,
+    color-mix(in srgb, var(--st-fuse) 84%, transparent) 72%,
+    color-mix(in srgb, var(--st-fuse) 50%, transparent) 82%,
+    color-mix(in srgb, var(--st-fuse) 18%, transparent) 91%,
+    transparent 100%
+  );
+  transform-origin: left center;
+  pointer-events: none;
+}

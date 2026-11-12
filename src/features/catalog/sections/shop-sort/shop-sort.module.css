@@ -1,0 +1,15 @@
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+}
+.menuIn {
+  animation: menu-in 140ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top right;
+}
+@media (prefers-reduced-motion: reduce) {
+  .menuIn {
+    animation: none;
+  }
+}

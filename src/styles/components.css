@@ -1,0 +1,268 @@
+/* Reusable component classes, issue #935.
+ *
+ * Lifted from ecom-frontend, minus the commerce-specific families the issue
+ * names explicitly: the `.pdp-*` family and the 11 `.status-*` order-state
+ * modifiers encode FalaqFood order semantics, not demo-site material, and stay
+ * out.
+ *
+ * Everything below sits in @layer components so it slots into the layer order
+ * tailwind.generated.css already declared (theme, base, components, utilities
+ * -- see src/styles.css's header comment on why an unlayered rule here would
+ * silently outrank a Tailwind utility regardless of specificity).
+ *
+ * AC 3 of #935 ("changing --color-primary alone visibly re-skins buttons,
+ * links, focus rings and badges") is checked here by grep, not by eye -- this
+ * file cannot open a browser. Every primary-toned rule below resolves its
+ * colour through var(--color-primary), var(--color-primary-dark) or
+ * var(--color-primary-light); none of them hardcodes a hex value. The other
+ * three surfaces AC 3 names live outside this file: src/app/ui/button.ts and
+ * src/app/ui/badge.ts use Tailwind's bg-primary/text-primary utilities, which
+ * compile against the same --color-primary theme.css declares, and the global
+ * focus ring and link colour are set in src/styles.css.
+ */
+@layer components {
+  /* ---- Buttons ---------------------------------------------------------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(var(--spacing) * 2);
+    padding: calc(var(--spacing) * 2) calc(var(--spacing) * 4);
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: var(--text-base);
+    line-height: 1.4;
+    cursor: pointer;
+    text-decoration: none;
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  .btn:disabled,
+  .btn[aria-disabled='true'] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .btn--primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-text-inverse);
+  }
+  .btn--primary:hover:not(:disabled) {
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+  }
+
+  .btn--secondary {
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary);
+    color: var(--color-text-inverse);
+  }
+
+  .btn--outline {
+    background-color: transparent;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+  .btn--outline:hover:not(:disabled) {
+    background-color: var(--color-primary-light);
+  }
+
+  .btn--ghost {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--color-primary);
+  }
+  .btn--ghost:hover:not(:disabled) {
+    background-color: var(--color-primary-light);
+  }
+
+  .btn--danger {
+    background-color: var(--color-danger);
+    border-color: var(--color-danger);
+    color: var(--color-text-inverse);
+  }
+
+  .btn--success {
+    background-color: var(--color-success);
+    border-color: var(--color-success);
+    color: var(--color-text-inverse);
+  }
+
+  .btn--sm {
+    padding: var(--spacing) calc(var(--spacing) * 3);
+    font-size: calc(var(--text-base) * 0.867);
+  }
+
+  .btn--lg {
+    padding: calc(var(--spacing) * 3) calc(var(--spacing) * 6);
+    font-size: calc(var(--text-base) * 1.067);
+  }
+
+  .btn--block {
+    display: flex;
+    width: 100%;
+  }
+
+  /* ---- Forms -------------------------------------------------------------
+   * .field-error and .error-banner tint against a literal, not a var(). The
+   * danger family (unlike primary) has no -light/-dark companion token to
+   * derive a tint from, and inventing one only for this rule would be a
+   * token nobody else has a reason to reference -- the same "no caller"
+   * reasoning tokens.css states for why its surface colours stay out of
+   * theme.css's @theme block. The border and text colour still resolve
+   * through var(--color-danger), which is what a rebrand of the danger tone
+   * actually needs to reach.
+   */
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing) * 1.5);
+  }
+
+  .form-label {
+    font-size: calc(var(--text-base) * 0.867);
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .form-control {
+    width: 100%;
+    padding: calc(var(--spacing) * 2) calc(var(--spacing) * 3);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: var(--text-base);
+    transition:
+      border-color var(--transition-fast),
+      box-shadow var(--transition-fast);
+  }
+  .form-control:focus-visible {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+  }
+
+  .form-row {
+    display: flex;
+    gap: calc(var(--spacing) * 4);
+    flex-wrap: wrap;
+  }
+  .form-row > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .form-stack {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing) * 4);
+  }
+
+  .field-error {
+    font-size: calc(var(--text-base) * 0.867);
+    color: var(--color-danger);
+  }
+
+  .error-banner {
+    padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-danger);
+    background-color: #fef2f2;
+    color: var(--color-danger);
+  }
+
+  /* ---- Section heading ---------------------------------------------------- */
+  .section-title {
+    margin: 0 0 calc(var(--spacing) * 4);
+    font-size: calc(var(--text-base) * 1.333);
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  /* ---- Price -------------------------------------------------------------
+   * None of these place a currency glyph in CSS content -- the symbol comes
+   * from formatMoney / the money pipe via Intl, which is the one thing
+   * allowed to decide it (.claude/rules/engineering-conventions.md, "one
+   * brand seam"). .currency wraps whatever that call already produced. */
+  .price {
+    font-weight: 700;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .price--original {
+    margin-inline-end: calc(var(--spacing) * 2);
+    font-weight: 400;
+    color: var(--color-text-muted);
+    text-decoration: line-through;
+  }
+
+  .price--range {
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .currency {
+    margin-inline-end: var(--spacing);
+    font-weight: 500;
+  }
+
+  /* ---- Rich content (product descriptions, CMS-ish prose) ---------------- */
+  .rich-content {
+    color: var(--color-text);
+    line-height: 1.7;
+  }
+  .rich-content :is(h1, h2, h3, h4, h5, h6) {
+    margin: calc(var(--spacing) * 6) 0 calc(var(--spacing) * 3);
+    color: var(--color-text);
+    font-weight: 700;
+  }
+  .rich-content p {
+    margin: 0 0 calc(var(--spacing) * 4);
+  }
+  .rich-content a {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+  .rich-content ul,
+  .rich-content ol {
+    margin: 0 0 calc(var(--spacing) * 4);
+    padding-inline-start: calc(var(--spacing) * 6);
+  }
+  .rich-content img {
+    max-width: 100%;
+    border-radius: var(--radius-md);
+  }
+
+  /* ---- Page shell ----------------------------------------------------------
+   * The max-width-plus-gutter shell, expressed once. header.ts, footer.ts and
+   * every page currently build their own version of this with Tailwind
+   * utilities (`mx-auto max-w-[--content-max-width] px-4`, duplicated per
+   * file) -- adopting .page-shell in those files is a follow-up for the
+   * layout shard, not done here; see this shard's report. */
+  .page-shell {
+    width: 100%;
+    max-width: var(--container-max-width);
+    margin-inline: auto;
+    padding-inline: calc(var(--spacing) * 4);
+  }
+
+  @media (min-width: 768px) {
+    .page-shell {
+      padding-inline: calc(var(--spacing) * 6);
+    }
+  }
+}

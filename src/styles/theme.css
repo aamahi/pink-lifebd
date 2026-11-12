@@ -1,0 +1,108 @@
+/* Tailwind entry point.
+ *
+ * The Angular build needed a standalone CLI pass because Angular's own pipeline emitted zero
+ * utility classes. Next.js runs Tailwind through its normal PostCSS pipeline (see
+ * postcss.config.mjs), so no second pass exists here. `source(none)` plus the explicit @source
+ * line keeps the scan set to the code and stops prose in .md files from emitting utilities.
+ */
+
+@import 'tailwindcss' source(none);
+
+@source "../**/*.{ts,tsx}";
+
+@theme {
+  /* ---- THE THEMING SEAM ----------------------------------------------
+   * A demo author changes these and nothing else. Everything below derives.
+   * DEMO-CHECKLIST.md step 2 points here. */
+  --color-primary: #179d55;
+  --color-primary-dark: #0f7a41;
+  --color-primary-light: #e8f6ee;
+
+  --color-secondary: #1f2937;
+  --color-accent: #f59e0b;
+  --color-danger: #dc2626;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+
+  /* Self-hosted per issue #935 -- see the comment in src/index.html for why
+   * Google Fonts does not come back. Noto Sans Bengali is listed second, not
+   * as a fallback for missing glyphs in general, but because U+09F3 (the taka
+   * sign) is a Bengali-block codepoint Noto Sans itself does not carry; the
+   * browser falls through to the second family for that one character and
+   * stays on the first for everything else. */
+  --font-primary:
+    'Noto Sans', 'Noto Sans Bengali', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+
+  /* The announcement bar's face, from Figma node 15:50 -- generates `font-jakarta`.
+   * Falls back to the primary stack so a taka sign in a promo still finds a glyph. */
+  --font-jakarta: 'Plus Jakarta Sans', var(--font-primary);
+
+  /* The home hero rail's face -- generates `font-system`. The component it was
+   * ported from renders in the platform UI font (Segoe UI on Windows), and its
+   * reference screenshot is set in it. */
+  --font-system: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* The home "Featured collection" title -- generates `font-display`. A
+   * high-contrast fashion serif, standing in for the reference's lettering. */
+  --font-display: 'Bodoni Moda', Georgia, 'Times New Roman', serif;
+
+  /* 15px, not Tailwind's 16px default. Matches ecom-frontend, which set it
+   * deliberately for denser commerce layouts.
+   *
+   * This is the ONLY font-size declaration for the app's base size. Issue #935's
+   * second defect was exactly two of these disagreeing (theme.css: .9375rem,
+   * typography.css: 14px hardcoded on body) with nothing catching it --
+   * scripts/check-css-tokens.js now counts every `--text-base:` plus every
+   * literal (non-var()) font-size on html/body across src/styles/** and fails
+   * above a count of 1. typography.css derives every heading and typo-* size
+   * from this var() instead of restating a number. */
+  --text-base: 0.9375rem;
+
+  /* ---- BREAKPOINTS -----------------------------------------------------
+   * ecom-admin-ui has no breakpoint scale at all -- 900px used 31 times as a
+   * bare literal, plus 768/640/600/560/1024px scattered elsewhere and one JS
+   * constant at layout.service.ts:4 (issue #935 census). ecom-frontend's scale
+   * is the one lifted here; Tailwind v4 reads --breakpoint-* to generate the
+   * sm:/md:/lg:/xl: responsive variants, so declaring these changes what those
+   * prefixes mean everywhere they're already used. */
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+
+  /* Tailwind derives p-N / m-N / gap-N from this multiplier. 4px is also
+   * Tailwind v4's own built-in default -- declared explicitly so that value is
+   * this repo's own decision on record, not an inherited default nobody wrote
+   * down, which is the same reasoning behind declaring --radius-* below rather
+   * than leaning on Tailwind's implicit ones. */
+  --spacing: 4px;
+
+  /* Three-step elevation, registered under Tailwind's own --shadow-* namespace
+   * so `shadow-sm` / `shadow-md` / `shadow-lg` resolve to these rather than
+   * Tailwind's built-in defaults. src/styles/tokens.css keeps a SEPARATE
+   * --shadow-card / --shadow-raised pair -- those are consumed directly via
+   * var() by ui/card.ts and are not meant to also exist as bare utility
+   * classes, which is the same "no caller for the utility" reasoning tokens.css
+   * already states for its surface colours. */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px rgb(0 0 0 / 0.07), 0 2px 4px rgb(0 0 0 / 0.06);
+  --shadow-lg: 0 10px 15px rgb(0 0 0 / 0.1), 0 4px 6px rgb(0 0 0 / 0.05);
+
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+
+  /* ---- RADIUS: the defect issue #935 exists to close --------------------
+   * ecom-frontend/src/styles/components.css references var(--radius-md) at
+   * lines 22, 139 and 188 and never declares it anywhere in that repo's own
+   * source -- it resolves only because Tailwind v4 emits its own
+   * --radius-md: .375rem default. Lift that file without Tailwind and every
+   * border radius silently disappears, with no error to find it by. Declaring
+   * the whole scale here, in OUR @theme block, means `rounded-sm/-md/-lg` and
+   * every var(--radius-*) reference keep resolving even if this file is ever
+   * read or lifted outside a Tailwind build. --radius-card is new: a fourth,
+   * larger step for product/content cards, distinct from the general --lg. */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-card: 16px;
+}

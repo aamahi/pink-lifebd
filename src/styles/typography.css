@@ -1,0 +1,94 @@
+/* Heading and typography scale, issue #935.
+ *
+ * Every size here derives from var(--text-base) through calc() rather than
+ * restating a number. That is what makes AC 2 ("exactly one base font size
+ * exists across theme.css and typography.css") true by construction instead
+ * of by discipline: the defect this closes was ecom-frontend's theme.css
+ * setting --text-base: .9375rem while its typography.css:16 separately
+ * hardcoded `body { font-size: 14px }`, and nothing noticed the two disagreed.
+ * scripts/check-css-tokens.js enforces this mechanically -- see its header
+ * comment for exactly what it counts.
+ *
+ * The multipliers themselves are a type scale in the classic sense (roughly a
+ * major-third-ish progression), not a value carried over from either source
+ * repo -- issue #935 asks for ".heading-1 through .heading-6 plus a typo-*
+ * scale" and leaves the ratios to whoever builds it.
+ */
+@layer base {
+  .heading-1 {
+    font-size: calc(var(--text-base) * 2.667);
+    font-weight: 700;
+    line-height: 1.15;
+  }
+  .heading-2 {
+    font-size: calc(var(--text-base) * 2.133);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .heading-3 {
+    font-size: calc(var(--text-base) * 1.667);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .heading-4 {
+    font-size: calc(var(--text-base) * 1.333);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .heading-5 {
+    font-size: calc(var(--text-base) * 1.067);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .heading-6 {
+    font-size: var(--text-base);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .typo-xs {
+    font-size: calc(var(--text-base) * 0.75);
+    line-height: 1.5;
+  }
+  .typo-sm {
+    font-size: calc(var(--text-base) * 0.867);
+    line-height: 1.5;
+  }
+  .typo-base {
+    font-size: var(--text-base);
+    line-height: 1.6;
+  }
+  .typo-lg {
+    font-size: calc(var(--text-base) * 1.2);
+    line-height: 1.5;
+  }
+  .typo-xl {
+    font-size: calc(var(--text-base) * 1.333);
+    line-height: 1.4;
+  }
+
+  /* Headings shrink on narrow screens so a heading-1 does not force horizontal
+   * scroll on a 360px viewport; the typo-* body-copy scale is left alone here
+   * because shrinking running text on mobile trades readability for a problem
+   * (overflow) that heading-sized text causes and body text mostly doesn't. */
+  @media (max-width: 767px) {
+    .heading-1 {
+      font-size: calc(var(--text-base) * 2.133);
+    }
+    .heading-2 {
+      font-size: calc(var(--text-base) * 1.733);
+    }
+    .heading-3 {
+      font-size: calc(var(--text-base) * 1.467);
+    }
+    .heading-4 {
+      font-size: calc(var(--text-base) * 1.2);
+    }
+    .heading-5 {
+      font-size: var(--text-base);
+    }
+    .heading-6 {
+      font-size: calc(var(--text-base) * 0.933);
+    }
+  }
+}

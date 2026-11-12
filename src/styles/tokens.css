@@ -1,0 +1,175 @@
+/* Semantic surface tokens, layout facts, the z-index ladder, and dark mode.
+ *
+ * These are NOT in theme.css's @theme block on purpose. @theme entries become
+ * Tailwind utilities (--color-primary generates bg-primary, text-primary, ...).
+ * These are consumed directly through var() by base styles, components.css and
+ * the arbitrary-value Tailwind syntax used across src/app/ (e.g.
+ * `bg-[--color-surface]`, `max-w-[--container-max-width]`), and generating a
+ * bare utility for each would add surface with no caller.
+ *
+ * Dark mode is BOTH prefers-color-scheme AND an explicit, persisted toggle --
+ * see src/app/core/services/theme.service.ts. That service resolves an
+ * `isDark` signal from localStorage first, falling back to
+ * `matchMedia('(prefers-color-scheme: dark)')` when nothing is stored, and
+ * sets ONE of two mutually exclusive classes on <html>:
+ *
+ *   - `dark-theme`  -- an explicit choice of dark, or the OS default relayed
+ *                      through the signal. Independent of the OS.
+ *   - `light-theme` -- an explicit choice of light. This class exists purely
+ *                      to defeat the `prefers-color-scheme: dark` media query
+ *                      below when the OS is dark and the visitor picked light
+ *                      anyway -- a media query has no way to know about a
+ *                      class, so without this the OS block would silently win
+ *                      over the explicit choice in exactly that one direction.
+ *
+ * Neither class is present when there is no stored preference; the media query
+ * is what drives the OS-default case, and it is gated with :not(.light-theme)
+ * so it never re-fights a stored 'light' choice.
+ */
+:root {
+  --color-background: #f3f4f6;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f9fafb;
+  --color-surface-sunken: #f3f4f6;
+  --color-border: #e5e7eb;
+  --color-text: #111827;
+  --color-text-muted: #6b7280;
+  --color-text-inverse: #ffffff;
+
+  /* Announcement bar, lifted exactly from Figma node 15:50 ("information Bar"
+   * fill, Body text/Regular/Website). Separate from --color-surface-sunken and
+   * --color-text-muted because the design's greys are not those greys, and
+   * pixel-matching the bar should not move every other sunken surface with it. */
+  --color-info-bar: #f4f4f4;
+  --color-info-bar-text: #0b0b0b;
+  --color-info-bar-muted: #6a6a68;
+  --color-info-bar-subtle: #8b8b88;
+
+  /* Main header, Figma node 15:58: white ground, website/body/stock-color
+   * rule, website/body/h1 ink, website/body/fill-color on the bag badge. */
+  --color-header-bg: #ffffff;
+  --color-header-border: #e6e5e2;
+  --color-header-text: #0b0b0b;
+  --color-header-badge-text: #fdfcf8;
+
+  /* Home hero clothing rail. The component it was ported from is written against
+   * shadcn's neutral theme, and its rail chrome, shadows and hang-tags are mixed
+   * from these exact values (background, foreground, muted-foreground, card,
+   * border, ring) -- the site's own slate greys would tint the steel blue. */
+  --color-rail-bg: #ffffff;
+  --color-rail-fg: #0a0a0a;
+  --color-rail-muted: #737373;
+  --color-rail-card: #ffffff;
+  --color-rail-border: #e5e5e5;
+  --color-rail-ring: #a1a1a1;
+
+  /* Home hero showcase (the lingerie still-life that replaces the clothing rail): a blush
+   * wash, a deeper pink glow behind the pieces, and the plum its shadows and the faint
+   * wordmark are mixed from. Brand-shaped, so they change with the client's palette. */
+  --color-hero-from: #fdf3f7;
+  --color-hero-to: #f7e4ec;
+  --color-hero-blob: #f4c3d5;
+  --color-hero-ink: #5b2740;
+
+  /* Ad landing pages (/lp/*): the logo's pink, for the price, the selected swatch ring and the
+   * order buttons. Their washes and ink reuse the hero's blush and plum above. */
+  --color-lp-accent: #d6317a;
+  --color-lp-accent-dark: #b92568;
+
+  /* Shop page (/shop): the warm grey product tile and the collection banner's
+   * beige, from the product-listing reference. Text and lines reuse the rail's
+   * neutrals above, so the shop and the home hero read as one store. */
+  --color-shop-tile: #f2f0ed;
+  --color-shop-tile-hover: #ebe8e3;
+  --color-shop-banner-from: #f1ece5;
+  --color-shop-banner-to: #e4ddd2;
+
+  /* Home featured coverflow: the reference's cool studio grey behind each card. */
+  --color-featured-from: #eceef0;
+  --color-featured-to: #dfe2e6;
+
+  /* Home reviews: the quote card's light grey and the reference's red for the
+   * "See more reviews" badge. */
+  --color-review-card: #f3f3f3;
+  --color-review-accent: #c0362c;
+
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.08), 0 1px 2px rgb(0 0 0 / 0.04);
+  --shadow-raised: 0 4px 12px rgb(0 0 0 / 0.1);
+
+  --header-height: 64px;
+  /* 56px bar plus whatever the device's home-indicator/gesture-bar inset is --
+   * env() falls back to 0 on a device with no safe-area inset, so this is 56px
+   * everywhere except the notched/gesture-nav devices it exists for. */
+  --bottom-bar-height: calc(56px + env(safe-area-inset-bottom));
+
+  /* --container-max-width is issue #935's name for this token. --content-max-width
+   * is kept as an alias, not a duplicate decision: src/app/layout/footer.ts (owned
+   * by a sibling shard in this fan-out) already reads --content-max-width, and
+   * renaming it out from under that file would silently drop its max-width with
+   * no build error. See this shard's report for the follow-up: migrate
+   * footer.ts to --container-max-width and delete this alias. */
+  --container-max-width: 1280px;
+  --content-max-width: var(--container-max-width);
+
+  /* Ordered base -> modal. A new layer only ever has to pick a name between two
+   * already-placed ones instead of guessing a number that might collide. */
+  --z-index-base: 0;
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1100;
+  --z-index-fixed: 1200;
+  --z-index-modal: 1300;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light-theme) {
+    --color-background: #020617;
+    --color-surface: #0f172a;
+    --color-surface-raised: #1e293b;
+    --color-surface-sunken: #020617;
+    --color-border: #334155;
+    --color-text: #f1f5f9;
+    --color-text-muted: #94a3b8;
+    --color-text-inverse: #0f172a;
+
+    /* No dark frame exists in Figma; these follow the dark palette above. */
+    --color-info-bar: #1e293b;
+    --color-info-bar-text: #f1f5f9;
+    --color-info-bar-muted: #94a3b8;
+    --color-info-bar-subtle: #64748b;
+    --color-header-bg: #0f172a;
+    --color-header-border: #334155;
+    --color-header-text: #f1f5f9;
+    --color-header-badge-text: #0f172a;
+
+    --shadow-card: 0 1px 3px rgb(0 0 0 / 0.4), 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-raised: 0 4px 12px rgb(0 0 0 / 0.5);
+  }
+}
+
+html.dark-theme {
+  /* Explicit dark, independent of the OS. Restated rather than shared with the
+   * media block above because CSS custom properties cannot be composed across
+   * two separate selectors the way a function call would -- the value list has
+   * to live in both places, and both must be edited together if either
+   * changes, which is why they are kept adjacent in this file. */
+  --color-background: #020617;
+  --color-surface: #0f172a;
+  --color-surface-raised: #1e293b;
+  --color-surface-sunken: #020617;
+  --color-border: #334155;
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-text-inverse: #0f172a;
+
+  --color-info-bar: #1e293b;
+  --color-info-bar-text: #f1f5f9;
+  --color-info-bar-muted: #94a3b8;
+  --color-info-bar-subtle: #64748b;
+  --color-header-bg: #0f172a;
+  --color-header-border: #334155;
+  --color-header-text: #f1f5f9;
+  --color-header-badge-text: #0f172a;
+
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.4), 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-raised: 0 4px 12px rgb(0 0 0 / 0.5);
+}
